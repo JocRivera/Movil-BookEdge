@@ -1,207 +1,237 @@
-import React, { useState, useContext } from 'react';
+// src/screens/LoginScreen.js
+import { useContext, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  // Button, // No lo estamos usando directamente
-  StyleSheet,
   ActivityIndicator,
   Alert,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
   TouchableOpacity,
-  Image, // Para el logo
-  KeyboardAvoidingView, // Para evitar que el teclado tape los inputs
-  Platform, // Para ajustes específicos de plataforma
-  ScrollView, // Para permitir scroll si el contenido es mucho
+  View,
 } from 'react-native';
-import { loginUser } from '../services/authMobileService';
 import { AuthContext } from '../context/AuthContext';
+import { loginUser } from '../services/authMobileService';
 
-import  AppLogo from "../../assets/logo.png"
-// src/screens/LoginScreen.js
-// ... (importaciones) ...
+import AppLogo from "../../assets/logo.jpg"; 
+import BackgroundImage from '../../assets/fondo3.jpg';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null); // <--- VAMOS A USAR ESTE ESTADO
+  const [error, setError] = useState(null);
 
   const { signIn } = useContext(AuthContext);
 
   const handleLogin = async () => {
-    setError(null); // Limpiar errores previos al intentar de nuevo
+    // ... (tu lógica de handleLogin sin cambios)
+    setError(null);
     if (!email.trim() || !password.trim()) {
-      // Podemos mostrar este error en la UI también, o mantener el Alert
       setError('Por favor, ingresa tu correo y contraseña.');
-      // Alert.alert('Entrada Inválida', 'Por favor, ingresa tu correo y contraseña.');
       return;
     }
-
     setIsLoading(true);
     const result = await loginUser(email, password);
     setIsLoading(false);
-
     if (result.success) {
       await signIn(result.user, result.token, result.refreshToken);
     } else {
-      setError(result.message || 'Ocurrió un error desconocido.'); // <--- ESTABLECE EL ERROR AQUÍ
-      // Ya no necesitas el Alert aquí si muestras el error en la UI
-      // Alert.alert('Error de Login', result.message || 'Ocurrió un error desconocido.');
+      setError(result.message || 'Ocurrió un error desconocido.');
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.keyboardAvoidingContainer}
+    <ImageBackground // <--- ENVOLTORIO PRINCIPAL
+      source={BackgroundImage}
+      style={styles.backgroundImage} // Estilo para que ocupe toda la pantalla
+      resizeMode="cover" // 'cover' para llenar, 'stretch' para estirar, 'contain' para ajustar
     >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled" // Para que el teclado no se cierre al tocar fuera de un input
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingContainer}
       >
-        <View style={styles.container}>
-          <Image source={AppLogo} style={styles.logo} />
-          <Text style={styles.title}>Bienvenido</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.overlay}> {/* Opcional: Un overlay para mejorar legibilidad del texto */}
+            <View style={styles.container}>
+              <View style={styles.logoContainer}>
+                <Image source={AppLogo} style={styles.logoImage} />
+              </View>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.input, error && (email.trim() === '' || password.trim() === '') ? styles.inputError : {}]} // Estilo de error si hay error y los campos están vacíos
-              placeholder="Correo electrónico"
-              value={email}
-              onChangeText={(text) => { setEmail(text); if(error) setError(null); }} // Limpiar error al escribir
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor="#a0aec0"
-              textContentType="emailAddress"
-            />
-            <TextInput
-              style={[styles.input, error && (email.trim() === '' || password.trim() === '') ? styles.inputError : {}]} // Estilo de error
-              placeholder="Contraseña"
-              value={password}
-              onChangeText={(text) => { setPassword(text); if(error) setError(null); }} // Limpiar error al escribir
-              secureTextEntry
-              placeholderTextColor="#a0aec0"
-              textContentType="password"
-            />
+              <Text style={styles.title}>Bienvenido</Text>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={[styles.input, error && (email.trim() === '' || password.trim() === '') ? styles.inputError : {}]}
+                  placeholder="Correo electrónico"
+                  value={email}
+                  onChangeText={(text) => { setEmail(text); if(error) setError(null); }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholderTextColor="#a0aec0" // Ajusta si el fondo es claro
+                  textContentType="emailAddress"
+                />
+                <TextInput
+                  style={[styles.input, error && (email.trim() === '' || password.trim() === '') ? styles.inputError : {}]}
+                  placeholder="Contraseña"
+                  value={password}
+                  onChangeText={(text) => { setPassword(text); if(error) setError(null); }}
+                  secureTextEntry
+                  placeholderTextColor="#a0aec0" // Ajusta si el fondo es claro
+                  textContentType="password"
+                />
+              </View>
+
+              {error && !isLoading && (
+                <Text style={styles.errorText}>{error}</Text>
+              )}
+
+              {isLoading ? (
+                <ActivityIndicator size="large" color="#007bff" style={styles.loader} />
+              ) : (
+                <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                    <Text style={styles.buttonText}>Ingresar</Text>
+                </TouchableOpacity>
+              )}
+
+              <View style={styles.linksContainer}>
+                <TouchableOpacity onPress={() => Alert.alert("Info", "Navegar a olvido de contraseña")}>
+                  <Text style={styles.linkText}>¿Olvidaste tu contraseña?</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-
-          {/* Mostrar el mensaje de error aquí */}
-          {error && !isLoading && ( // Mostrar solo si no está cargando
-            <Text style={styles.errorText}>{error}</Text>
-          )}
-
-          {isLoading ? (
-            <ActivityIndicator size="large" color="#3182ce" style={styles.loader} />
-          ) : (
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Ingresar</Text>
-            </TouchableOpacity>
-          )}
-
-          <View style={styles.linksContainer}>
-            <TouchableOpacity onPress={() => Alert.alert("Info", "Navegar a olvido de contraseña")}>
-              <Text style={styles.linkText}>¿Olvidaste tu contraseña?</Text>
-            </TouchableOpacity>
-         
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
-// src/screens/LoginScreen.js -> CONTINUACIÓN (ESTILOS AJUSTADOS)
-
 const styles = StyleSheet.create({
+  backgroundImage: { // Estilo para ImageBackground
+    flex: 1, // Ocupa toda la pantalla
+    width: '100%',
+    height: '100%',
+  },
   keyboardAvoidingContainer: {
     flex: 1,
-    backgroundColor: '#e2e8f0', // Un gris azulado muy claro, más profesional que blanco puro
+    // backgroundColor: 'transparent', // El fondo lo da ImageBackground
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center', // Centra el contenido verticalmente en el ScrollView
+    justifyContent: 'center',
+  },
+  overlay: { // Opcional: para mejorar contraste del texto sobre la imagen
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.15)', // Overlay oscuro semitransparente
+    // Si tu imagen de fondo es clara y los textos son oscuros, podrías usar:
+    // backgroundColor: 'rgba(255, 255, 255, 0.3)', // Overlay claro semitransparente
+    justifyContent: 'center',
   },
   container: {
-    // flex: 1, // No es necesario si scrollContainer ya tiene flexGrow: 1 y justifyContent: 'center'
     alignItems: 'center',
-    paddingHorizontal: 40, // Un poco más de padding horizontal
-    paddingVertical: 30,   // Padding vertical
+    paddingHorizontal: 40,
+    paddingVertical: 30,
+    // backgroundColor: 'transparent', // El fondo lo da ImageBackground o el overlay
   },
-  logo: {
-    width: 180, // Ligeramente más pequeño si el original era muy grande
+  logoContainer: {
+    width: 180,
     height: 180,
-    resizeMode: 'contain',
-    marginBottom: 25, // Reducido el margen inferior
+    borderRadius: 90,
+    overflow: 'hidden',
+    // backgroundColor: '#fff', // Quita esto si quieres que se vea el fondo de la imagen principal
+    marginBottom: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2, },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   title: {
-    fontSize: 26, // Ligeramente más pequeño
-    fontWeight: '600', // Un poco menos bold
-    color: '#2d3748', // Un gris oscuro para el texto
+    fontSize: 28, // Ajusta según el nuevo fondo
+    fontWeight: 'bold',
+    color: '#fff', // Texto blanco para contraste con overlay oscuro
     textAlign: 'center',
-    marginBottom: 30, // Espacio antes de los inputs
+    marginBottom: 30,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)', // Sombra para el texto
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
-
   inputContainer: {
     width: '100%',
-    marginBottom: 10, // Reducir margen si el error va después
+    marginBottom: 10,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Fondo blanco semitransparente para inputs
     color: '#2d3748', // Texto oscuro
-    paddingHorizontal: 18, // Un poco más de padding interno
+    paddingHorizontal: 18,
     paddingVertical: 14,
-    borderRadius: 8, // Bordes suaves
+    borderRadius: 8,
     marginBottom: 18,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#cbd5e0', // Borde gris claro
-    shadowColor: "#000", // Sombra sutil para inputs
-    shadowOffset: { width: 0, height: 1, },
-    shadowOpacity: 0.05,
-    shadowRadius: 2.00,
-    elevation: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)', // Borde claro
   },
-  inputError: { // Estilo para cuando hay error en el input
-    borderColor: '#e53e3e', // Borde rojo
-    backgroundColor: '#fed7d740' // Fondo rojo muy claro y translúcido
+  inputError: {
+    borderColor: '#ff6b6b', // Un rojo más brillante para el error
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
   },
-  errorText: { // Para mostrar el error del login
-    color: '#c53030', // Rojo oscuro para el texto del error
+  errorText: {
+    color: '#ffdddd', // Texto de error claro para fondo oscuro
+    backgroundColor: 'rgba(200, 0, 0, 0.5)', // Fondo semitransparente para el error
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
     textAlign: 'center',
-    marginBottom: 15, // Espacio antes del botón
+    marginBottom: 15,
     fontSize: 14,
     fontWeight: '500',
   },
   button: {
-    backgroundColor: '#007bff', // Azul primario
+    backgroundColor: '#007bff',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
     width: '100%',
-    marginTop: 5, // Reducido si el errorText ya da espacio
+    marginTop: 10, // Ajustado
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3, }, // Sombra un poco más notoria
+    shadowOffset: { width: 0, height: 3, },
     shadowOpacity: 0.20,
     shadowRadius: 4.0,
     elevation: 4,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 17, // Ligeramente más pequeño
+    fontSize: 17,
     fontWeight: '600',
   },
   loader: {
-    marginVertical: 20, // Espacio vertical para el loader
+    marginVertical: 20,
   },
   linksContainer: {
-    marginTop: 25, // Espacio antes de los links
+    marginTop: 25,
     width: '100%',
-    alignItems: 'center', // Centrar el link de "Olvidaste contraseña"
+    alignItems: 'center',
   },
   linkText: {
-    color: '#007bff', // Mismo azul que el botón
+    color: '#d1d5db', // Texto de link claro para fondo oscuro
     fontSize: 14,
     fontWeight: '500',
+    textShadowColor: 'rgba(0, 0, 0, 0.7)', // Sombra para el texto
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 });
 

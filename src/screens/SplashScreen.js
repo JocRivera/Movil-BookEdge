@@ -1,9 +1,8 @@
 // src/screens/SplashScreen.js
-import React from 'react';
-import { View, ActivityIndicator, StyleSheet, Text, Image } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 
 // Opcional: Si tienes un logo para el splash
-import LogoImage from '../../assets/logo.png'; // Descomenta y ajusta la ruta
+import LogoImage from '../../assets/logo.jpg'; // Descomenta y ajusta la ruta
 
 const SplashScreen = () => (
   <View style={styles.container}>

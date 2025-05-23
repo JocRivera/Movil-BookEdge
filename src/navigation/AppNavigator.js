@@ -87,7 +87,7 @@ const AppTabs = () => (
   >
     <Tab.Screen
       name="InicioTab"
-      component={MainAppFlowNavigator} // <--- HomeScreen (con cards) ahora está dentro de un Stack
+      compxonent={MainAppFlowNavigator} // <--- HomeScreen (con cards) ahora está dentro de un Stack
       options={{
         tabBarLabel: "Inicio",
         headerShown: false, // El MainAppFlowNavigator manejará su propio header
