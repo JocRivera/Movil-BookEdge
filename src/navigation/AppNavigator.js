@@ -1,16 +1,16 @@
 // src/navigation/AppNavigatorContent.js
-import React, { useContext } from "react";
-import { Text, Platform } from "react-native";
-import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { AuthContext } from "../context/AuthContext";
-import LoginScreen from "../screens/LoginScreen";
-import HomeScreen from "../screens/HomeScreen";
-import AlojamientosScreen from "../screens/AlojamientosScreen";
-import AccommodationDetailScreen from "../screens/AccommodationDetailScreen";
-import UserProfileScreen from '../screens/UserProfileScreen'; // Importar Perfil
-import SplashScreenComponent from "../screens/SplashScreen";
+import { createStackNavigator } from "@react-navigation/stack";
+import { useContext } from "react";
+import { Platform } from "react-native";
 import FeatherIcon from 'react-native-vector-icons/Feather'; // Para iconos de Tabs
+import { AuthContext } from "../context/AuthContext";
+import AccommodationDetailScreen from "../screens/AccommodationDetailScreen";
+import AlojamientosScreen from "../screens/AlojamientosScreen";
+import HomeScreen from "../screens/HomeScreen";
+import LoginScreen from "../screens/LoginScreen";
+import SplashScreenComponent from "../screens/SplashScreen";
+import UserProfileScreen from '../screens/UserProfileScreen'; // Importar Perfil
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -87,7 +87,7 @@ const AppTabs = () => (
   >
     <Tab.Screen
       name="InicioTab"
-      compxonent={MainAppFlowNavigator} // <--- HomeScreen (con cards) ahora está dentro de un Stack
+      component={MainAppFlowNavigator} // <--- HomeScreen (con cards) ahora está dentro de un Stack
       options={{
         tabBarLabel: "Inicio",
         headerShown: false, // El MainAppFlowNavigator manejará su propio header
