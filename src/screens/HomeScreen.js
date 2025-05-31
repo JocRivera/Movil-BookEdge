@@ -1,17 +1,17 @@
 // src/screens/HomeScreen.js
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
+  Alert,
+  Platform,
   SafeAreaView,
   ScrollView,
-  Alert,
-  Platform
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { AuthContext } from "../context/AuthContext";
 import FeatherIcon from "react-native-vector-icons/Feather"; // Asumiendo que quieres iconos
+import { AuthContext } from "../context/AuthContext";
 
 const HomeScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext); // Ya no necesitamos signOut aquí
@@ -51,17 +51,17 @@ const HomeScreen = ({ navigation }) => {
     },
   ];
 
- const handleNavigate = (item) => {
+  const handleNavigate = (item) => {
     if (item.id === "alojamientos") { // Usar el 'id' del menuItem para identificar
       navigation.navigate("AlojamientosList"); // <--- NAVEGA DIRECTAMENTE
     } else if (item.screen === "MisReservas") { // Si tuvieras esta pantalla
-      // navigation.navigate(item.screen); // Necesitarías añadirla al MainAppStack también
+      navigation.navigate("ReservasList"); // Navega a la lista de reservas
       Alert.alert("Navegación", `Ir a la pantalla: ${item.screen}`);
     } else {
       Alert.alert("Próximamente", "Esta función estará disponible pronto.");
     }
   };
-  
+
   if (!user) {
     return null;
   }
@@ -92,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
                   <Text style={styles.cardSubtitle}>{item.description}</Text>
                 </View>
                 <View style={styles.cardArrowContainer}>
-                    <FeatherIcon name="chevron-right" size={24} color="#d0d0d0" />
+                  <FeatherIcon name="chevron-right" size={24} color="#d0d0d0" />
                 </View>
               </TouchableOpacity>
             ))}
