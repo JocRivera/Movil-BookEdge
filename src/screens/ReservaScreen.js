@@ -16,15 +16,15 @@ import {
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import { getAllReservations } from '../services/reservationService'; // Servicio que necesitarás crear
 
-// Configuración de colores y estilos por estado de reserva
+// Configuración de colores y estilos por status de reserva
 const reservationStatusConfig = {
-    'pendiente': {
+    'reservado': {
         borderColor: '#ffc107',
         backgroundColor: '#fff8e1',
         iconName: 'clock',
         iconColor: '#ff8f00'
     },
-    'confirmada': {
+    'confirmado': {
         borderColor: '#28a745',
         backgroundColor: '#e8f5e8',
         iconName: 'check-circle',
@@ -36,13 +36,13 @@ const reservationStatusConfig = {
         iconName: 'x-circle',
         iconColor: '#dc3545'
     },
-    'en proceso': {
+    'pendiente': {
         borderColor: '#007bff',
         backgroundColor: '#e3f2fd',
         iconName: 'play-circle',
         iconColor: '#007bff'
     },
-    'anulada': {
+    'anulado': {
         borderColor: '#6c757d',
         backgroundColor: '#f8f9fa',
         iconName: 'slash',
@@ -52,8 +52,7 @@ const reservationStatusConfig = {
 
 
 const ReservationCard = ({ item, onPress }) => {
-    console.log('Rendering ReservationCard for item:', item);
-    const statusConfig = reservationStatusConfig[item.estado.toLowerCase()] || reservationStatusConfig['pendiente'];
+    const statusConfig = reservationStatusConfig[item.status.toLowerCase()] || reservationStatusConfig['reservado'];
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -83,35 +82,40 @@ const ReservationCard = ({ item, onPress }) => {
                         color={statusConfig.iconColor}
                     />
                     <Text style={[styles.statusText, { color: statusConfig.iconColor }]}>
-                        {item.estado.charAt(0).toUpperCase() + item.estado.slice(1)}
+                        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                     </Text>
                 </View>
-                <Text style={styles.reservationNumber}>#{item.numeroReserva}</Text>
+                <Text style={styles.reservationNumber}>#{item.idReservation}</Text>
             </View>
 
             <View style={styles.cardContent}>
                 <View style={styles.mainInfo}>
-                    <Text style={styles.clientName}>{item.nombreCliente}</Text>
-                    <Text style={styles.accommodationName}>{item.alojamiento}</Text>
+                    <Text style={styles.clientName}>{item.user.identification}</Text>
+                    <Text style={styles.accommodationName}>
+                        {[
+                            ...(item.cabins?.map(cabin => cabin.name || cabin.cabinName) || []),
+                            ...(item.bedrooms?.map(room => room.name || room.bedroomName) || [])
+                        ].join(', ') || 'Sin alojamiento'}
+                    </Text>
                 </View>
 
                 <View style={styles.detailsSection}>
                     <View style={styles.detailRow}>
                         <FeatherIcon name="calendar" size={14} color="#666" />
                         <Text style={styles.detailLabel}>Check-in:</Text>
-                        <Text style={styles.detailValue}>{formatDate(item.fechaInicio)}</Text>
+                        <Text style={styles.detailValue}>{formatDate(item.startDate)}</Text>
                     </View>
 
                     <View style={styles.detailRow}>
                         <FeatherIcon name="calendar" size={14} color="#666" />
                         <Text style={styles.detailLabel}>Check-out:</Text>
-                        <Text style={styles.detailValue}>{formatDate(item.fechaFin)}</Text>
+                        <Text style={styles.detailValue}>{formatDate(item.endDate)}</Text>
                     </View>
 
                     <View style={styles.detailRow}>
                         <FeatherIcon name="package" size={14} color="#666" />
                         <Text style={styles.detailLabel}>Plan:</Text>
-                        <Text style={styles.detailValue}>{item.plan}</Text>
+                        <Text style={styles.detailValue}>{item.plan.name}</Text>
                     </View>
                 </View>
             </View>
@@ -144,11 +148,11 @@ const ReservasScreen = ({ navigation }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedSections, setExpandedSections] = useState({
+        'reservado': true,
+        'confirmado': true,
         'pendiente': true,
-        'confirmada': true,
-        'en proceso': true,
         'cancelada': false,
-        'anulada': false
+        'anulado': false
     });
 
     const fetchReservations = async () => {
@@ -190,8 +194,8 @@ const ReservasScreen = ({ navigation }) => {
 
     const handleCardPress = (item) => {
         // Navegar a los detalles de la reserva
-        console.log('Navegando a detalle de reserva:', item.id);
-        // navigation.navigate('ReservationDetail', { reservationId: item.id });
+        console.log('Navegando a detalle de reserva:', item.idReservation);
+        // navigation.navigate('ReservationDetail', { reservationId: item.idReservation });
         Alert.alert('Detalle de Reserva', `Ver detalles de la reserva ${item.numeroReserva}`);
     };
 
@@ -199,9 +203,9 @@ const ReservasScreen = ({ navigation }) => {
         if (!searchTerm) return reservations;
 
         return reservations.filter(reservation =>
-            reservation.nombreCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            reservation.alojamiento.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            reservation.numeroReserva.toLowerCase().includes(searchTerm.toLowerCase())
+            reservation?.user?.identification?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            reservation?.alojamiento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            reservation.idReservation.toString().includes(searchTerm)
         );
     };
 
@@ -209,14 +213,14 @@ const ReservasScreen = ({ navigation }) => {
         const filtered = filterReservations(reservations, searchTerm);
         const grouped = {};
 
-        // Inicializar todos los estados
+        // Inicializar todos los statuss
         Object.keys(reservationStatusConfig).forEach(status => {
             grouped[status] = [];
         });
 
-        // Agrupar reservas por estado
+        // Agrupar reservas por status
         filtered.forEach(reservation => {
-            const status = reservation.estado.toLowerCase();
+            const status = reservation.status.toLowerCase();
             if (grouped[status]) {
                 grouped[status].push(reservation);
             }
@@ -294,7 +298,7 @@ const ReservasScreen = ({ navigation }) => {
                         onToggle={() => toggleSection(section.key)}
                     />
                 )}
-                keyExtractor={(item) => `reservation-${item.id}`}
+                keyExtractor={(item) => `reservation-${item.idReservation}`}
                 contentContainerStyle={styles.listContentContainer}
                 refreshControl={
                     <RefreshControl
