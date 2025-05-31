@@ -9,6 +9,7 @@ import AccommodationDetailScreen from "../screens/AccommodationDetailScreen";
 import AlojamientosScreen from "../screens/AlojamientosScreen";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/LoginScreen";
+import ReservasScreen from "../screens/ReservaScreen";
 import SplashScreenComponent from "../screens/SplashScreen";
 import UserProfileScreen from '../screens/UserProfileScreen'; // Importar Perfil
 
@@ -22,29 +23,34 @@ const MainAppStack = createStackNavigator();
 function MainAppFlowNavigator() {
   return (
     <MainAppStack.Navigator
-        screenOptions={{
-            headerStyle: { backgroundColor: "#FFFFFF", elevation: 1, shadowOpacity: 0.1 },
-            headerTintColor: "#2c3e50",
-            headerTitleStyle: { fontWeight: "600", fontSize: 18 },
-        }}
+      screenOptions={{
+        headerStyle: { backgroundColor: "#FFFFFF", elevation: 1, shadowOpacity: 0.1 },
+        headerTintColor: "#2c3e50",
+        headerTitleStyle: { fontWeight: "600", fontSize: 18 },
+      }}
     >
-        {/* La HomeScreen (con las cards) es la raíz de este stack */}
-        <MainAppStack.Screen
-            name="HomeDashboard" // Diferente de InicioTab para evitar conflictos
-            component={HomeScreen}
-            // El título se establece dinámicamente en HomeScreen
-        />
-        <MainAppStack.Screen
-            name="AlojamientosList"
-            component={AlojamientosScreen}
-            options={{ title: "Alojamientos" }}
-        />
-        <MainAppStack.Screen
-            name="AccommodationDetail"
-            component={AccommodationDetailScreen}
-            // options={({ route }) => ({ title: route.params.accommodationName || 'Detalle' })}
-        />
-        {/* Aquí podrían ir otras pantallas que se navegan desde HomeScreen pero no son tabs */}
+      {/* La HomeScreen (con las cards) es la raíz de este stack */}
+      <MainAppStack.Screen
+        name="HomeDashboard" // Diferente de InicioTab para evitar conflictos
+        component={HomeScreen}
+      // El título se establece dinámicamente en HomeScreen
+      />
+      <MainAppStack.Screen
+        name="AlojamientosList"
+        component={AlojamientosScreen}
+        options={{ title: "Alojamientos" }}
+      />
+      <MainAppStack.Screen
+        name="AccommodationDetail"
+        component={AccommodationDetailScreen}
+      // options={({ route }) => ({ title: route.params.accommodationName || 'Detalle' })}
+      />
+      <MainAppStack.Screen
+        name="ReservasList"
+        component={ReservasScreen}
+        options={{ title: "Reservas" }}
+      />
+      {/* Aquí podrían ir otras pantallas que se navegan desde HomeScreen pero no son tabs */}
     </MainAppStack.Navigator>
   )
 }
