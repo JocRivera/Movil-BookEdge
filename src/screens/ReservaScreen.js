@@ -55,13 +55,15 @@ const ReservationCard = ({ item, onPress }) => {
     const statusConfig = reservationStatusConfig[item.status.toLowerCase()] || reservationStatusConfig['reservado'];
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
+        const [year, month, day] = dateString.split('-');
+        const date = new Date(Number(year), Number(month) - 1, Number(day)); // mes es 0-indexado
         return date.toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
     };
+
 
     return (
         <TouchableOpacity
