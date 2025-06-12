@@ -55,13 +55,28 @@ const ReservationCard = ({ item, onPress }) => {
     const statusConfig = reservationStatusConfig[item.status.toLowerCase()] || reservationStatusConfig['reservado'];
 
     const formatDate = (dateString) => {
-        const [year, month, day] = dateString.split('-');
-        const date = new Date(Number(year), Number(month) - 1, Number(day)); // mes es 0-indexado
-        return date.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+        // Return a placeholder if dateString is null or undefined
+        if (!dateString) return 'No especificada';
+
+        // Otherwise, proceed with the formatting
+        try {
+            const [year, month, day] = dateString.split('-');
+            const date = new Date(Number(year), Number(month) - 1, Number(day)); // mes es 0-indexado
+
+            // Check if the date is valid before formatting
+            if (isNaN(date.getTime())) {
+                return 'Fecha inválida';
+            }
+
+            return date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch (error) {
+            console.warn('Error formatting date:', error, dateString);
+            return 'Error en fecha';
+        }
     };
 
 
